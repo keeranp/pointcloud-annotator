@@ -1,10 +1,17 @@
 import * as THREE from 'three';
-import { PCDLoader } from 'three/examples/jsm/loaders/PCDLoader.js'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import * as dat from 'dat.gui'
 
-let camera, scene, renderer, canvas;
+let camera, scene, renderer, canvas, points;
 
 export const init = () => {
+    const mouse = {
+        x: undefined,
+        y: undefined
+    }
+
+
+
     canvas = document.querySelector("#canvas")
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 
@@ -17,50 +24,97 @@ export const init = () => {
     scene.add(camera);
 
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.addEventListener('change', render); // use if there is no animation loop
     controls.minDistance = 0.5;
     controls.maxDistance = 10;
     controls.listenToKeyEvents(window)
 
-    window.addEventListener('keypress', keyboard);
-}
+    // const gui = dat.GUI()
 
-export const displayPoints = points => {
-    points.geometry.center();
-    points.geometry.rotateX(Math.PI);
-    points.material.color.setHex(0x000000);
-    scene.add(points);
-    console.log("points successfully loaded")
-}
+    // const world = {
+    //     brush: {
+    //         size: 100
+    //     }
+    // }
 
-function keyboard(ev) {
+    // // gui.add(world.brush, 'size', 1, 500)
 
-    const points = scene.getObjectByName('test.pcd');
+    const raycaster = new THREE.Raycaster()
 
-    switch (ev.key || String.fromCharCode(ev.keyCode || ev.charCode)) {
+    const animate = () => {
+        requestAnimationFrame(animate)
+        renderer.render(scene, camera)
 
-        case '+':
-            points.material.size *= 1.2;
-            break;
+        if (resizeRendererToDisplaySize(renderer)) {
+            const canvas = renderer.domElement;
+            camera.aspect = canvas.clientWidth / canvas.clientHeight;
+            camera.updateProjectionMatrix();
+        }
 
-        case '-':
-            points.material.size /= 1.2;
-            break;
 
+
+        animate()
+
+        window.addEventListener('keypress', keyboard);
+        addEventListener('mousemove', (event) => {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
+        })
     }
 
-    render();
+    export const displayPoints = (_points) => {
+        points = _points
+        points.geometry.center();
+        points.geometry.rotateX(Math.PI);
+        points.material.color.set(0xffffff)
+        points.material.vertexColors = true
 
-}
+        const colors = []
 
-export function render() {
-    if (resizeRendererToDisplaySize(renderer)) {
-        const canvas = renderer.domElement;
-        camera.aspect = canvas.clientWidth / canvas.clientHeight;
-        camera.updateProjectionMatrix();
+        for (let i = 0; i < points.geometry.attributes.position.count; i++) {
+            colors.push(0, 0, 0)
+        }
+
+        points.geometry.setAttribute("color", new THREE.BufferAttribute(new Float32Array(colors), 3))
+        console.log(points.geometry)
+        scene.add(points);
     }
-    renderer.render(scene, camera);
+
+    function keyboard(ev) {
+        switch (ev.key || String.fromCharCode(ev.keyCode || ev.charCode)) {
+            case '+':
+                points.material.size *= 1.2;
+                break;
+
+            case '-':
+                points.material.size /= 1.2;
+                break;
+
+            case ' ':
+                raycaster.setFromCamera(mouse, camera)
+                raycaster.params.Points.threshold = 0.05;
+                if (points) {
+                    const intersects = raycaster.intersectObject(points, false)
+
+                    if (intersects.length > 0) {
+                        console.log(intersects.length)
+                        for (let i = 0; i < intersects.length; i++) {
+                            const { color } = intersects[i].object.geometry.attributes
+
+                            color.setX(intersects[i].index, 0)
+                            color.setY(intersects[i].index, 0.56)
+                            color.setZ(intersects[i].index, 0.56)
+                            color.needsUpdate = true
+                        }
+                    }
+                }
+        }
+    }
 }
+
+// export function render() {
+
+//     renderer.render(scene, camera);
+// }
 
 function resizeRendererToDisplaySize(renderer) {
     const canvas = renderer.domElement;
