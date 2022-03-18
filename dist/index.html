@@ -13,7 +13,30 @@
             <input type="file" id="selectFile" value="import" multiple="">
             <label for="selectFile">Choose your file</label>
         </form>
-
+        <div>
+            <h2>Classes</h2>
+        </div>
+        <div id="classes-display">
+        </div>
+        <button id="add-class-button">Add a class</button>
+        <div id="modal">
+            <div class="modal-content">
+                <div class="modal-form">
+                    <div>
+                        <p id="class-name">Class Name</p>
+                        <input type="text" id="class-name-input">
+                    </div>
+                    <div>
+                        <p id="class-color">Class color</p>
+                        <input type="color" id="class-color-input">
+                    </div>
+                    <button id="create-class-button">Create class</button>
+                    <span class="close">&times;</span>
+                </div>
+            </div>
+        </div>
+        <button id="erase-button">Erase</button>
+        <button id="save-button">Save Labels</button>
     </nav>
     <div id="content">
         <canvas id="canvas"></canvas>

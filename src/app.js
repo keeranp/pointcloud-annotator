@@ -1,10 +1,24 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import * as dat from 'dat.gui'
+import { hexToRgb, waitForElm } from './utils';
 
-let camera, scene, renderer, canvas, points, raycaster, mouse;
+let camera, scene, renderer, canvas, points, raycaster, mouse
+let classes = []
+let currentColor = { r: 0, g: 0, b: 0 }
 
 export const init = () => {
+    const modal = document.getElementById("modal");
+    const addClassButton = document.getElementById("add-class-button");
+    const closeButton = document.getElementsByClassName("close")[0];
+
+    const classNameInput = document.querySelector("#class-name-input")
+    const classColorInput = document.querySelector("#class-color-input")
+    const createClassButton = document.querySelector("#create-class-button")
+    const classesDisplay = document.querySelector("#classes-display")
+
+    const eraseButton = document.querySelector("#erase-button")
+
     mouse = {
         x: undefined,
         y: undefined
@@ -54,11 +68,78 @@ export const init = () => {
 
     animate()
 
+    /////////////////////////////////////////////////// EVENTS //////////////////////////////////////////////////
+
+    // When the user clicks on the button, open the modal
+    addClassButton.onclick = () => {
+        modal.style.display = "block";
+    }
+
+    // When the user clicks on <span> (x), close the modal
+    closeButton.onclick = () => {
+        modal.style.display = "none";
+    }
+
     window.addEventListener('keypress', keyboard);
     addEventListener('mousemove', (event) => {
         mouse.x = ((event.clientX - document.querySelector("#nav").clientWidth) / canvas.clientWidth) * 2 - 1
         mouse.y = -(event.clientY / canvas.clientHeight) * 2 + 1
     })
+
+    eraseButton.onclick = () => {
+        const doms = document.getElementsByClassName(`class`)
+
+        for (let i = 0; i < doms.length; i++) {
+            doms[i].style.background = "#ffffff"
+        }
+        currentColor = hexToRgb("#000000")
+    }
+
+    createClassButton.onclick = async() => {
+        if (!classNameInput.value) {
+            alert("Please select a class name")
+        } else if (classColorInput.value == "#000000") {
+            alert("Please select a class color")
+        } else {
+            if (classes.some(e => e.className === classNameInput.value)) {
+                alert("Class name already taken")
+            } else if (classes.some(e => e.color === classColorInput.value)) {
+                alert("Class color already taken")
+            } else {
+                classes.push({ className: classNameInput.value, color: classColorInput.value, selected: false })
+
+                const div = document.createElement('div');
+                div.innerHTML =
+                    `<div class="name ${classes.length}">${classNameInput.value}</div>
+                    <div class="color ${classes.length}" style="background:${classColorInput.value};"></div>`
+                div.className = `class ${classes.length}`
+                div.onclick = selectClass
+                classesDisplay.appendChild(div)
+
+                classNameInput.value = null
+                classColorInput.value = "#000000"
+                modal.style.display = "none"
+            }
+        }
+    }
+}
+
+const selectClass = event => {
+    let domElement = undefined
+    const doms = document.getElementsByClassName(`class`)
+
+    for (let i = 0; i < doms.length; i++) {
+        doms[i].style.background = "#ffffff"
+    }
+
+    if (event.path.length == 8) {
+        domElement = event.path[1]
+        currentColor = hexToRgb(classes[event.path[1].className.split(' ')[1] - 1].color)
+    } else {
+        domElement = event.path[0]
+        currentColor = hexToRgb(classes[event.path[0].className.split(' ')[1] - 1].color)
+    }
+    domElement.style.background = "rgb(0, 163, 166, 0.8)"
 }
 
 export const displayPoints = (_points) => {
@@ -79,7 +160,7 @@ export const displayPoints = (_points) => {
     scene.add(points);
 }
 
-function keyboard(ev) {
+const keyboard = (ev) => {
     switch (ev.key || String.fromCharCode(ev.keyCode || ev.charCode)) {
         case '+':
             points.material.size *= 1.2
@@ -95,24 +176,22 @@ function keyboard(ev) {
                 const intersects = raycaster.intersectObject(points, false)
 
                 if (intersects.length > 0) {
-                    for (let i = 0; i < intersects.length; i++) {
+                    for (let i = 0; i < Math.round(intersects.length); i++) {
+                        console.log(intersects[i].distanceToRay)
                         const { color } = intersects[i].object.geometry.attributes
-                        color.setX(intersects[i].index, 0)
-                        color.setY(intersects[i].index, 0.56)
-                        color.setZ(intersects[i].index, 0.56)
+                        color.setX(intersects[i].index, currentColor.r)
+                        color.setY(intersects[i].index, currentColor.g)
+                        color.setZ(intersects[i].index, currentColor.b)
                         color.needsUpdate = true
-
                     }
                 }
             }
 
             break
     }
-
-
 }
 
-function resizeRendererToDisplaySize(renderer) {
+const resizeRendererToDisplaySize = (renderer) => {
     const canvas = renderer.domElement;
     const pixelRatio = window.devicePixelRatio;
     const width = canvas.clientWidth * pixelRatio | 0;
