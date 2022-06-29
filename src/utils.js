@@ -7,6 +7,10 @@ export const hexToRgb = (hex) => {
     } : null;
 }
 
+export const round = (num, decimal) => {
+    return Math.round((num + Number.EPSILON) * 10 ** decimal) / 10 ** decimal
+}
+
 export const waitForElm = (selector) => {
     return new Promise(resolve => {
         if (document.querySelector(selector)) {

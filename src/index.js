@@ -11,7 +11,7 @@ document.getElementById("selectFile").oninput = (e) => {
         const loader = new PCDLoader();
 
         loader.load(fileURL, points => {
-            displayPoints(points)
+            displayPoints(points, file.name)
         })
     } else {
         alert("Please select a .pcd file")

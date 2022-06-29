@@ -1,9 +1,11 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import * as dat from 'dat.gui'
-import { hexToRgb, waitForElm } from './utils';
+import { hexToRgb, round, waitForElm } from './utils';
+import { saveAs } from 'file-saver';
 
 let camera, scene, renderer, canvas, points, raycaster, mouse
+let fileName
 let classes = []
 let currentColor = { r: 0, g: 0, b: 0 }
 
@@ -19,6 +21,8 @@ export const init = () => {
 
     const eraseButton = document.querySelector("#erase-button")
 
+    const saveButton = document.querySelector("#save-button")
+
     mouse = {
         x: undefined,
         y: undefined
@@ -30,7 +34,7 @@ export const init = () => {
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0xdddddd)
 
-    camera = new THREE.PerspectiveCamera(75, 2, 0.01, 100);
+    camera = new THREE.PerspectiveCamera(75, 2, 0.001, 100);
     camera.position.set(0, 0, 1);
     camera.up.set(0, 0, -1)
     scene.add(camera);
@@ -122,6 +126,46 @@ export const init = () => {
             }
         }
     }
+
+    saveButton.onclick = () => {
+        if (points && classes.length > 0) {
+            const data = {}
+            classes.forEach(classData => {
+                const { color } = points.geometry.attributes
+                    // const class = {}
+                let labels = new Array(color.count).fill(0)
+                let voidLabels = new Array(color.count).fill(0)
+
+                for (let i = 0; i < color.array.length; i += 3) {
+                    const r = round(color.array[i], 3)
+                    const g = round(color.array[i + 1], 3)
+                    const b = round(color.array[i + 2], 3)
+
+                    const classColor = hexToRgb(classData.color)
+
+                    if (r == round(classColor.r, 3) && g == round(classColor.g, 3) && b == round(classColor.b, 3)) {
+                        labels[Math.round(i / 3)] = 1
+                    }
+
+                    if (r == 0 && g == 0 && b == 0) {
+                        voidLabels[Math.round(i / 3)] = 1
+                    }
+                }
+
+                const className = classData.className
+                data[className] = {}
+                console.log(data)
+                data[className].labels = labels
+
+                data["void"] = {}
+                data["void"].labels = voidLabels
+            }, )
+
+            var json = JSON.stringify(data);
+            var blob = new Blob([json], { type: "application/json" });
+            saveAs(blob, fileName.split(".")[0] + ".json")
+        }
+    }
 }
 
 const selectClass = event => {
@@ -142,7 +186,13 @@ const selectClass = event => {
     domElement.style.background = "rgb(0, 163, 166, 0.8)"
 }
 
-export const displayPoints = (_points) => {
+export const displayPoints = (_points, _fileName) => {
+    if (points) {
+        points.geometry.dispose();
+        points.material.dispose();
+        scene.remove(points);
+    }
+    fileName = _fileName
     points = _points
     points.geometry.center()
     points.geometry.rotateX(Math.PI)
@@ -156,7 +206,7 @@ export const displayPoints = (_points) => {
     }
 
     points.geometry.setAttribute("color", new THREE.BufferAttribute(new Float32Array(colors), 3))
-    console.log(points.geometry)
+    console.log(points.geometry.attributes.color.count)
     scene.add(points);
 }
 
@@ -177,7 +227,7 @@ const keyboard = (ev) => {
 
                 if (intersects.length > 0) {
                     for (let i = 0; i < Math.round(intersects.length); i++) {
-                        console.log(intersects[i].distanceToRay)
+                        // console.log(intersects[i].distanceToRay)
                         const { color } = intersects[i].object.geometry.attributes
                         color.setX(intersects[i].index, currentColor.r)
                         color.setY(intersects[i].index, currentColor.g)
