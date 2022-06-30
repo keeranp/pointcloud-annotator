@@ -44,6 +44,7 @@ export const init = () => {
     controls.maxDistance = 10;
     controls.listenToKeyEvents(window)
 
+    //Setup brush size controls
     const gui = new dat.GUI()
 
     const world = {
@@ -56,6 +57,7 @@ export const init = () => {
         raycaster.params.Points.threshold = world.brush.size
     })
 
+    //Setup size of the brush
     raycaster = new THREE.Raycaster()
     raycaster.params.Points.threshold = 0.05
 
@@ -84,7 +86,10 @@ export const init = () => {
         modal.style.display = "none";
     }
 
+    //listen to keyboard events
     window.addEventListener('keypress', keyboard);
+
+    //Read mouse position at any moment
     addEventListener('mousemove', (event) => {
         mouse.x = ((event.clientX - document.querySelector("#nav").clientWidth) / canvas.clientWidth) * 2 - 1
         mouse.y = -(event.clientY / canvas.clientHeight) * 2 + 1
@@ -132,7 +137,6 @@ export const init = () => {
             const data = {}
             classes.forEach(classData => {
                 const { color } = points.geometry.attributes
-                    // const class = {}
                 let labels = new Array(color.count).fill(0)
                 let voidLabels = new Array(color.count).fill(0)
 
@@ -187,6 +191,7 @@ const selectClass = event => {
 }
 
 export const displayPoints = (_points, _fileName) => {
+    // If there a loaded pointcloud, unload it
     if (points) {
         points.geometry.dispose();
         points.material.dispose();
@@ -199,6 +204,7 @@ export const displayPoints = (_points, _fileName) => {
     points.material.color.set(0xffffff)
     points.material.vertexColors = true
 
+    // Add color attribute for the points object
     const colors = []
 
     for (let i = 0; i < points.geometry.attributes.position.count; i++) {
@@ -221,6 +227,7 @@ const keyboard = (ev) => {
             break
 
         case ' ':
+            //Paint the pointcloud
             raycaster.setFromCamera(mouse, camera)
             if (points) {
                 const intersects = raycaster.intersectObject(points, false)
