@@ -2,7 +2,7 @@
 
 This tool aims to help you annotate pointclouds.
 
-https://github.com/keeranp/pointcloud-annotator/blob/main/example/example.mp4?raw=true
+https://user-images.githubusercontent.com/58974894/176670356-81729b0a-914e-4d34-b889-1eba9c326cfc.mp4
 
 ## Get started
 
