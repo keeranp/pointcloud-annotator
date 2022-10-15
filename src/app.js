@@ -40,8 +40,8 @@ export const init = () => {
     scene.add(camera);
 
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.minDistance = 0.5;
-    controls.maxDistance = 10;
+    controls.minDistance = 0.05;
+    controls.maxDistance = 100;
     controls.listenToKeyEvents(window)
 
     //Setup brush size controls
@@ -128,6 +128,8 @@ export const init = () => {
                 classNameInput.value = null
                 classColorInput.value = "#000000"
                 modal.style.display = "none"
+
+                div.click()
             }
         }
     }
@@ -212,8 +214,9 @@ export const displayPoints = (_points, _fileName) => {
     }
 
     points.geometry.setAttribute("color", new THREE.BufferAttribute(new Float32Array(colors), 3))
-    console.log(points.geometry.attributes.color.count)
+    console.log(points.geometry)
     scene.add(points);
+    console.log(fileName + " Added to the scene.")
 }
 
 const keyboard = (ev) => {

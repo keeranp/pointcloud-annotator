@@ -1,48 +1,28 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="index_style.css">
     <title>Pointcloud Annotation Tool</title>
-    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <nav id="nav">
-        <form>
-            <input type="file" id="selectFile" value="import" multiple="">
-            <label for="selectFile">Choose your file</label>
-        </form>
-        <div>
-            <h2>Classes</h2>
-        </div>
-        <div id="classes-display">
-        </div>
-        <button id="add-class-button">Add a class</button>
-        <div id="modal">
-            <div class="modal-content">
-                <div class="modal-form">
-                    <div>
-                        <p id="class-name">Class Name</p>
-                        <input type="text" id="class-name-input">
-                    </div>
-                    <div>
-                        <p id="class-color">Class color</p>
-                        <input type="color" id="class-color-input">
-                    </div>
-                    <button id="create-class-button">Create class</button>
-                    <span class="close">&times;</span>
-                </div>
-            </div>
-        </div>
-        <button id="erase-button">Erase</button>
-        <button id="save-button">Save Labels</button>
-    </nav>
-    <div id="content">
-        <canvas id="canvas"></canvas>
-    </div>
-    <script type="module" src="main.js">
-    </script>
+    <h1>Pointcloud Annotation Tool</h1>
+    <video width="50%" autoplay>
+        <source src="../example/example.mp4" type="video/mp4">
+        Your browser does not support HTML video.
+    </video>
+    <a href="example.html" class="btn">Example</a>
+    <a href="annotation.html" class="btn">Annotate</a>
+    <h2>How to annotate</h2>
+    <p>Create your classes, select one class, aim with your mouse and press the Space button to start annotating.
+    </p>
+    <footer>
+        <p>Designed and Built by Keeran Paheerathan</p>
+    </footer>
 </body>
 
 </html>
